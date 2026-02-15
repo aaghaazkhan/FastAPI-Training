@@ -51,7 +51,7 @@ def get_todo(todo_id: int):
 # query parameter
 # example: http://127.0.0.1:8000/todo?first_n=2
 @api.get('/todo', response_model=List[Todo])
-def get_todos(first_n: int = None):
+def get_todos(first_n: Optional[int] = None):
     if first_n:
         return all_todos[:first_n]
     else:
@@ -70,12 +70,7 @@ def create_todo(todo: TodoCreate):
         todo_id=new_todo_id, 
         todo_name=todo.todo_name, 
         todo_description=todo.todo_description)
-
-    new_todo = {
-        'todo_id': new_todo_id,
-        'todo_name': todo.todo_name,
-        'todo_description': todo.todo_description
-    }
+    
     all_todos.append(new_todo)
 
     return new_todo
@@ -88,8 +83,10 @@ def create_todo(todo: TodoCreate):
 def update_todo(todo_id: int, updated_todo: TodoUpdate):
     for todo in all_todos:
         if todo.todo_id == todo_id:
-            todo.todo_name = updated_todo.todo_name
-            todo.todo_description = updated_todo.todo_description
+            if updated_todo.todo_name is not None:
+                todo.todo_name = updated_todo.todo_name
+            if updated_todo.todo_description is not None:
+                todo.todo_description = updated_todo.todo_description
             return todo
         
     raise HTTPException(status_code=404, detail="Todo not found")
